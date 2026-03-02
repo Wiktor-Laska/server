@@ -25,7 +25,17 @@ GLint posAttrib, colAttrib;	//
 glm::mat4 viewMatrix = glm::mat4();
 glm::mat4 projectionMatrix = glm::mat4(); //marzerz widoku i rzutowania
 GLfloat fi = 0;
+bool lobby = true;
 
+
+struct Character {
+  unsigned int TextureID;
+  glm::ivec2 Size;
+  glm::ivec2 Bearing;
+  unsigned int Advance;
+};
+
+std::map<char, Character> Characters;
 
 //-------------Atrybuty wierzcholkow------------------------------------------
 
@@ -151,6 +161,11 @@ int initShaders(void)
 //--------------------------------------------funkcja inicjujaca-------------------------------------
 int initGL(void)
 {
+
+    FT_Library ft;
+    FT_Init_FreeType(&ft)
+
+    FT_Set_Pixel_Sizes(face, 0, 48);
    
     if(initShaders())
     {   
@@ -220,14 +235,20 @@ int drawGLScene(int counter)
     GLint transformMatrixUniformLocation = glGetUniformLocation(shaderProgram, "transformMatrix");  //pobranie polozenia macierzy bedacej zmienna jednorodna shadera
     glUniformMatrix4fv(transformMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(transformMatrix)); //zapisanie macierzy bedacej zmienna jednorodna shadera wierzcholkow
     
-
+    /*
     glBindVertexArray(vao[0]);
     glDrawArrays(GL_TRIANGLES, 0, 3); //rysowanie trojkata
 
     glBindVertexArray(vao[1]);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
+    */
+    //fi += 0.5;
 
-    fi += 0.5;
+    if (lobby){
+      
+    } else {
+      //gra
+    }
  
     glFlush();
 
@@ -246,3 +267,5 @@ void deleteAll()
     glDeleteBuffers(1, &ebo);
     glDeleteVertexArrays(2, vao);
 }
+
+
