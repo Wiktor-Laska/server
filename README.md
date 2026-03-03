@@ -3,7 +3,7 @@ sudo apt update && sudo apt install gdb -y
 
 #kompilacja
 gcc server.c -o server -pthread
-gcc -g client.c -o client
+gcc -g client.c -o client -pthread
 
 #odpalanie
 ./server
