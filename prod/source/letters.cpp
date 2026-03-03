@@ -287,7 +287,7 @@ void init_A(GLuint shaderProgram) {
 
     glBindVertexArray(0);
 }
-//fix node number
+
 void init_B(GLuint shaderProgram) {
     glGenVertexArrays(1, &vao_B);
     glBindVertexArray(vao_B);
