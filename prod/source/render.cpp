@@ -13,7 +13,9 @@
 
 #include "letters.h"
 
-
+//TODO:
+//implement scenes
+//implement buttons
 
 GLuint vbo[4];		//identyfikatory buforow wierzcholkow
 GLuint vao[2];		//identyfikatory tablic wierzcholkow
@@ -235,14 +237,17 @@ int drawGLScene(int counter)
     
     //fi += 0.5;
 
-    
+    lobby = true;
 
     if (results){      // result scene
   
-    } else if (lobby){ // lobby scene
-
-    } else if (game) { // game scene
-      
+    } else if (game){ // lobby scene
+  
+    } else if (lobby) { // game scene
+      glBindVertexArray(vao[1]);
+      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
+      drawText("WAITING", glm::vec3(-1.2f, 1.5f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText("READY", glm::vec3(-0.7f, -0.45f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix);
     } else {           // main menu scene
       glBindVertexArray(vao[1]);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata

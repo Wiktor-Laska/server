@@ -4,6 +4,11 @@
 #include <iostream>
 
 
+// TODO:
+//implement numbers, "Y", "J", ".', 
+//implement coloring of text
+
+
 //define A vao, vbo
 GLuint vao_A;
 GLuint vbo_pos_A;
@@ -706,7 +711,7 @@ void init_G(GLuint shaderProgram) {
     for (int i = 0; i < 60 * 3; i += 3) {
         col_G[i]    = 1.0f; //red
         col_G[i+1]  = 0.0f; //green
-        col_G[i+2]  = 1.0f; //blue
+        col_G[i+2]  = 0.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_G);
