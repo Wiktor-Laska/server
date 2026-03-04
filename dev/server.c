@@ -9,6 +9,7 @@
 
 #define MAX_PLAYERS 4
 #define COLOR_NUMBER 9
+#define RANDOM_EVENTS 4
 void tasuj_tablice(char *tablica, int rozmiar)
 {
     for (int i = rozmiar - 1; i > 0; i--)
@@ -30,6 +31,7 @@ typedef struct
     int ready[MAX_PLAYERS];
     int num_players;
     char colors[COLOR_NUMBER];
+    char random_event[RANDOM_EVENTS];
 } Server;
 void send_all(Server *serv, char *msg, int l)
 {
@@ -190,14 +192,20 @@ void game(Server *serv)
             send_all(serv, serv->colors, 1); // prześlij numer tekstu koloru
 
             // TODO wysłanie zdarzeń losowych wysłanie zdarzeń np 4 chary 0-nie ma zdarzenia 1<= zdarzenie o mocy podanej
-
+            for(int x=0;x<RANDOM_EVENTS;x++){
+                if(rand()%(20/(lvl-'0')))
+                    serv->random_event[x]=0;
+                else
+                    serv->random_event[x]=(lvl-'0');
+            }
+            send_all(serv,serv->random_event,RANDOM_EVENTS);
             //==========================================================================================================
 
             // sprawdzanie odpowiedzi
             // oczekiwanie poll
             int poll_result = poll(serv->fds, serv->num_players + 1, 10000-(lvl-'1')*1500); // 5 sekund na odpowiedź - 1,5 na każdy następny lvl
 
-            // 1. gracz przysłał poprawną odpowiedź +2
+            // 1. gracz przysłał poprawną odpowiedź +1-4
             // 2. gracz przysłał błędną odpowiedź -2
             // 3. żaden gracz nie przysłał odpowiedzi -1 dla wszystkich
             if (poll_result == 0)
@@ -226,7 +234,7 @@ void game(Server *serv)
                         {
                             serv->points[j - 1] += (lvl-'0');
 
-                            sprintf(msg, "Gracz %d odpowiedział dobrze +2\n", j);
+                            sprintf(msg, "Gracz %d odpowiedział dobrze +%d\n", j, lvl - '0');
                             send_all(serv, msg, strlen(msg));
                         }
                         else
@@ -256,17 +264,33 @@ void end_game(Server *serv)
     sprintf(msg, "KONIEC\n");
     send_all(serv, msg, strlen(msg));
     send_all(serv, serv->points, serv->num_players);
+    for(int i=1;i<=serv->num_players;i++){
+        if(serv->fds[i].fd!=-1){
+            strcpy(msg, "Serwer zostal zamkniety. Do zobaczenia!\n");
+            send(serv->fds[i].fd, msg, strlen(msg), MSG_NOSIGNAL);
+            close(serv->fds[i].fd);
+            serv->fds[i].fd = -1;
+        }
+    }
+    if (serv->listenfd != -1) {
+        close(serv->listenfd);
+        serv->listenfd = -1;
+    }
+    serv->num_players = 0;
+    printf("Serwer został pomyślnie zamknięty.\n");
 }
 int main()
 {
     Server main_server;
-    init(&main_server);
-    printf("Serwer uruchomiony. Czekam na graczy na porcie 5000...\n");
-    lobby(&main_server);
-    printf("zaczynanie gry..\n");
-    game(&main_server);
-    printf("koniec gry..\n");
-    end_game(&main_server);
+    while(1){
+        init(&main_server);
+        printf("Serwer uruchomiony. Czekam na graczy na porcie 5000...\n");
+        lobby(&main_server);
+        printf("zaczynanie gry..\n");
+        game(&main_server);
+        printf("koniec gry..\n");
+        end_game(&main_server);
+    }
 
     return 0;
 }
