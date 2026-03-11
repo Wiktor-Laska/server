@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include <GL/glx.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -177,9 +178,54 @@ void keyPressed(KeySym key)
     { case XK_Escape:
           done = True;
           break;
-      case XK_F1:
+    case XK_F1:
        
          break;
+    case XK_1:
+        ip = ip + "1";
+        ip_text = ip_text + "1";
+        break;
+    case XK_2:
+        ip = ip + "2";
+        ip_text = ip_text + "2";
+        break;
+    case XK_3:
+        ip = ip + "3";
+        ip_text = ip_text + "3";
+        break;
+    case XK_4:
+        ip = ip + "4";
+        ip_text = ip_text + "4";
+        break;
+    case XK_5:
+        ip = ip + "5";
+        ip_text = ip_text + "5";
+        break;
+    case XK_6:
+        ip = ip + "6";
+        ip_text = ip_text + "6";
+        break;
+    case XK_7:
+        ip = ip + "7";
+        ip_text = ip_text + "7";
+        break;
+    case XK_8:
+        ip = ip + "8";
+        ip_text = ip_text + "8";
+        break;
+    case XK_9:
+        ip = ip + "9";
+        ip_text = ip_text + "9";
+        break;
+    case XK_0:
+        ip = ip + "0";
+        ip_text = ip_text + "0";
+        break;
+    case XK_period:
+        ip = ip + ".";
+        ip_text = ip_text + ".";
+        break;
+
     }
 }
 
@@ -220,7 +266,22 @@ int main(int argc, char **argv)
                   // iMy=event.xmotion.y;
                   break;		
               case ButtonPress: // wcisniecie przycisku myszy
+              {
+                    int mouseX = event.xbutton.x;
+                    int mouseY = event.xbutton.y;
+                    int btnX = 280;
+                    int btnY = 400;
+                    int btnWidth = 520;
+                    int btnHeight = 80;
+
+                    if (mouseX >= btnX && mouseX <= btnX + btnWidth &&
+                          mouseY >= btnY && mouseY <= btnY + btnHeight) {
+                          
+                          printf("Button clicked at %d, %d!\n", mouseX, mouseY);
+                          // Do your button action here
+                      }
                   break;
+              }
               case KeyPress: // wcisniecie klawisza
                   key = XLookupKeysym(&event.xkey, 0);
                   keyPressed(key);

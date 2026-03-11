@@ -2,6 +2,7 @@
 #include "../glm/gtc/matrix_transform.hpp"
 #include "../glm/gtc/type_ptr.hpp"
 #include <iostream>
+#include <string>
 
 
 // TODO:
@@ -237,8 +238,8 @@ GLfloat pos_J[] = { //define J pos matrix
     -0.25f,  0.35f, 0.0f,      0.25f,  0.5f,  0.0f,     -0.25f,  0.5f,  0.0f,
 
     //prawa
-     0.1f,  -0.25f, 0.0f,      0.25f, -0.25f, 0.0f,      0.25f,  0.5f,  0.0f,
-     0.1f,  -0.25f, 0.0f,      0.25f,  0.5f,  0.0f,      0.1f,   0.5f,  0.0f,
+     0.1f,  -0.5f,  0.0f,      0.25f, -0.5f,  0.0f,      0.25f,  0.5f,  0.0f,
+     0.1f,  -0.5f,  0.0f,      0.25f,  0.5f,  0.0f,      0.1f,   0.5f,  0.0f,
 
     //dol
     -0.15f, -0.5f,  0.0f,      0.25f, -0.5f,  0.0f,      0.25f, -0.35f, 0.0f,
@@ -567,11 +568,11 @@ GLuint vbo_col_Y;
 GLfloat pos_Y[] = { //define Y pos matrix
     //lewa
     -0.25f,  0.5f,  0.0f,     -0.1f,   0.5f,  0.0f,      0.0f,   0.1f,  0.0f,
-    -0.25f,  0.5f,  0.0f,      0.0f,   0.1f,  0.0f,     -0.15f,  0.1f,  0.0f,
+    -0.25f,  0.5f,  0.0f,      0.0f,   0.1f,  0.0f,     -0.05f, -0.3f,  0.0f,
 
     //prawa
      0.25f,  0.5f,  0.0f,      0.1f,   0.5f,  0.0f,      0.0f,   0.1f,  0.0f,
-     0.25f,  0.5f,  0.0f,      0.0f,   0.1f,  0.0f,      0.15f,  0.1f,  0.0f,
+     0.25f,  0.5f,  0.0f,      0.0f,   0.1f,  0.0f,      0.05f, -0.3f,  0.0f,
 
     //kreska
     -0.075f, 0.1f,  0.0f,      0.075f, 0.1f,  0.0f,      0.075f,-0.5f,  0.0f,
@@ -2047,7 +2048,7 @@ void drawLetter(char letter, glm::vec3 position, float scale, GLuint shaderProgr
     }
 }
 
-void drawText(const char* text, glm::vec3 startPosition, float scale, GLuint shaderProgram, glm::mat4 projectionMatrix, glm::mat4 viewMatrix) {
+void drawText(const std::string& text, glm::vec3 startPosition, float scale, GLuint shaderProgram, glm::mat4 projectionMatrix, glm::mat4 viewMatrix) {
     float offset = 0.0f;
 
     for (int i = 0; text[i] != '\0'; i++) {
