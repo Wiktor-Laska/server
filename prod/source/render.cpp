@@ -26,6 +26,7 @@ GLuint shaderProgram;
 GLint vertexShader;	//identyfikator shadera wierzcholkow
 GLint fragmentShader;   //identyfikator shadera fragmentow
 GLint posAttrib, colAttrib;	//
+static GLint colorMulUniformLocation = -1;
 
 glm::mat4 viewMatrix = glm::mat4();
 glm::mat4 projectionMatrix = glm::mat4(); //marzerz widoku i rzutowania
@@ -94,11 +95,12 @@ const GLchar* fShader_string =
 {
   "#version 130\n"\
   "in  vec3 Color;\n"\
+  "uniform vec3 colorMul;\n"\
   "out vec4 outColor;\n"\
 
   "void main(void)\n"\
   "{\n"\
-  "  outColor = vec4(Color, 1.0);\n"\
+  "  outColor = vec4(Color * colorMul, 1.0);\n"\
   "}\n"
 };
 
@@ -176,6 +178,10 @@ int initGL(void)
         glEnableVertexAttribArray(posAttrib);
 	colAttrib = glGetAttribLocation(shaderProgram, "color");    //pobranie indeksu tablicy atrybutow wierzcholkow okreslajacych kolor
         glEnableVertexAttribArray(colAttrib);
+        colorMulUniformLocation = glGetUniformLocation(shaderProgram, "colorMul");
+        if (colorMulUniformLocation >= 0) {
+            glUniform3f(colorMulUniformLocation, 1.0f, 1.0f, 1.0f);
+        }
 	
 	glBindVertexArray(vao[0]);					//wybor tablicy
 		
@@ -222,6 +228,10 @@ int drawGLScene(int counter)
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+    if (colorMulUniformLocation >= 0) {
+        glUniform3f(colorMulUniformLocation, 1.0f, 1.0f, 1.0f);
+    }
     
     glm::mat4 translationMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 0.0f));  		//macierz przesuniecia o zadany wektor
     glm::mat4 rotationMatrix = glm::rotate(glm::mat4(), glm::radians(fi), glm::vec3(0.0f, 1.0f, 0.0f)); //macierz obrotu o dany kat wokol wektora
@@ -267,7 +277,7 @@ int drawGLScene(int counter)
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
       drawText("STROOPVIVAL", glm::vec3(-1.2f, 1.5f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix);
       drawText(ip_text, glm::vec3(-1.3f, 0.1f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
-      drawText("CONNECT", glm::vec3(-0.7f, -0.45f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText("CONNECT", glm::vec3(-0.7f, -0.45f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix, glm::vec3(0.0, 0.0, 0.0));
     }
  
     glFlush();
@@ -288,5 +298,4 @@ void deleteAll()
     glDeleteVertexArrays(2, vao);
     deleteLeters();
 }
-
 

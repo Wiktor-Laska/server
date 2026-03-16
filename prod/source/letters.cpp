@@ -942,8 +942,8 @@ void init_A(GLuint shaderProgram) {
 
     for (int i = 0; i < 24 * 3; i += 3) {
         col_A[i]    = 1.0f; //red
-        col_A[i+1]  = 0.0f; //green
-        col_A[i+2]  = 0.0f; //blue
+        col_A[i+1]  = 1.0f; //green
+        col_A[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_A);
@@ -972,8 +972,8 @@ void init_B(GLuint shaderProgram) {
 
     for (int i = 0; i < 57 * 3; i += 3) {
         col_B[i]    = 1.0f; //red
-        col_B[i+1]  = 0.0f; //green
-        col_B[i+2]  = 0.0f; //blue
+        col_B[i+1]  = 1.0f; //green
+        col_B[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_B);
@@ -1002,8 +1002,8 @@ void init_C(GLuint shaderProgram) {
 
     for (int i = 0; i < 48 * 3; i += 3) {
         col_C[i]    = 1.0f; //red
-        col_C[i+1]  = 0.0f; //green
-        col_C[i+2]  = 0.0f; //blue
+        col_C[i+1]  = 1.0f; //green
+        col_C[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_C);
@@ -1032,8 +1032,8 @@ void init_D(GLuint shaderProgram) {
 
     for (int i = 0; i < 36 * 3; i += 3) {
         col_D[i]    = 1.0f; //red
-        col_D[i+1]  = 0.0f; //green
-        col_D[i+2]  = 0.0f; //blue
+        col_D[i+1]  = 1.0f; //green
+        col_D[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_D);
@@ -1062,8 +1062,8 @@ void init_E(GLuint shaderProgram) {
 
     for (int i = 0; i < 24 * 3; i += 3) {
         col_E[i]    = 1.0f; //red
-        col_E[i+1]  = 0.0f; //green
-        col_E[i+2]  = 0.0f; //blue
+        col_E[i+1]  = 1.0f; //green
+        col_E[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_E);
@@ -1092,8 +1092,8 @@ void init_G(GLuint shaderProgram) {
 
     for (int i = 0; i < 60 * 3; i += 3) {
         col_G[i]    = 1.0f; //red
-        col_G[i+1]  = 0.0f; //green
-        col_G[i+2]  = 0.0f; //blue
+        col_G[i+1]  = 1.0f; //green
+        col_G[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_G);
@@ -1122,8 +1122,8 @@ void init_I(GLuint shaderProgram) {
 
     for (int i = 0; i < 6 * 3; i += 3) {
         col_I[i]    = 1.0f; //red
-        col_I[i+1]  = 0.0f; //green
-        col_I[i+2]  = 0.0f; //blue
+        col_I[i+1]  = 1.0f; //green
+        col_I[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_I);
@@ -1152,8 +1152,8 @@ void init_J(GLuint shaderProgram) {
 
     for (int i = 0; i < 24 * 3; i += 3) {
         col_J[i]    = 1.0f; //red
-        col_J[i+1]  = 0.0f; //green
-        col_J[i+2]  = 0.0f; //blue
+        col_J[i+1]  = 1.0f; //green
+        col_J[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_J);
@@ -1182,8 +1182,8 @@ void init_K(GLuint shaderProgram) {
 
     for (int i = 0; i < 18 * 3; i += 3) {
         col_K[i]    = 1.0f; //red
-        col_K[i+1]  = 0.0f; //green
-        col_K[i+2]  = 0.0f; //blue
+        col_K[i+1]  = 1.0f; //green
+        col_K[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_K);
@@ -1212,8 +1212,8 @@ void init_L(GLuint shaderProgram) {
 
     for (int i = 0; i < 12 * 3; i += 3) {
         col_L[i]    = 1.0f; //red
-        col_L[i+1]  = 0.0f; //green
-        col_L[i+2]  = 0.0f; //blue
+        col_L[i+1]  = 1.0f; //green
+        col_L[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_L);
@@ -1242,8 +1242,8 @@ void init_M(GLuint shaderProgram) {
 
     for (int i = 0; i < 24 * 3; i += 3) {
         col_M[i]    = 1.0f; //red
-        col_M[i+1]  = 0.0f; //green
-        col_M[i+2]  = 0.0f; //blue
+        col_M[i+1]  = 1.0f; //green
+        col_M[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_M);
@@ -1272,8 +1272,8 @@ void init_N(GLuint shaderProgram) {
 
     for (int i = 0; i < 18 * 3; i += 3) {
         col_N[i]    = 1.0f; //red
-        col_N[i+1]  = 0.0f; //green
-        col_N[i+2]  = 0.0f; //blue
+        col_N[i+1]  = 1.0f; //green
+        col_N[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_N);
@@ -1302,8 +1302,8 @@ void init_O(GLuint shaderProgram) {
 
     for (int i = 0; i < 54 * 3; i += 3) {
         col_O[i]    = 1.0f; //red
-        col_O[i+1]  = 0.0f; //green
-        col_O[i+2]  = 0.0f; //blue
+        col_O[i+1]  = 1.0f; //green
+        col_O[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_O);
@@ -1332,8 +1332,8 @@ void init_P(GLuint shaderProgram) {
 
     for (int i = 0; i < 33 * 3; i += 3) {
         col_P[i]    = 1.0f; //red
-        col_P[i+1]  = 0.0f; //green
-        col_P[i+2]  = 0.0f; //blue
+        col_P[i+1]  = 1.0f; //green
+        col_P[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_P);
@@ -1362,8 +1362,8 @@ void init_R(GLuint shaderProgram) {
 
     for (int i = 0; i < 39 * 3; i += 3) {
         col_R[i]    = 1.0f; //red
-        col_R[i+1]  = 0.0f; //green
-        col_R[i+2]  = 0.0f; //blue
+        col_R[i+1]  = 1.0f; //green
+        col_R[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_R);
@@ -1392,8 +1392,8 @@ void init_S(GLuint shaderProgram) {
 
     for (int i = 0; i < 72 * 3; i += 3) {
         col_S[i]    = 1.0f; //red
-        col_S[i+1]  = 0.0f; //green
-        col_S[i+2]  = 0.0f; //blue
+        col_S[i+1]  = 1.0f; //green
+        col_S[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_S);
@@ -1422,8 +1422,8 @@ void init_T(GLuint shaderProgram) {
 
     for (int i = 0; i < 12 * 3; i += 3) {
         col_T[i]    = 1.0f; //red
-        col_T[i+1]  = 0.0f; //green
-        col_T[i+2]  = 0.0f; //blue
+        col_T[i+1]  = 1.0f; //green
+        col_T[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_T);
@@ -1452,8 +1452,8 @@ void init_U(GLuint shaderProgram) {
 
     for (int i = 0; i < 36 * 3; i += 3) {
         col_U[i]    = 1.0f; //red
-        col_U[i+1]  = 0.0f; //green
-        col_U[i+2]  = 0.0f; //blue
+        col_U[i+1]  = 1.0f; //green
+        col_U[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_U);
@@ -1482,8 +1482,8 @@ void init_V(GLuint shaderProgram) {
 
     for (int i = 0; i < 12 * 3; i += 3) {
         col_V[i]    = 1.0f; //red
-        col_V[i+1]  = 0.0f; //green
-        col_V[i+2]  = 0.0f; //blue
+        col_V[i+1]  = 1.0f; //green
+        col_V[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_V);
@@ -1512,8 +1512,8 @@ void init_W(GLuint shaderProgram) {
 
     for (int i = 0; i < 24 * 3; i += 3) {
         col_W[i]    = 1.0f; //red
-        col_W[i+1]  = 0.0f; //green
-        col_W[i+2]  = 0.0f; //blue
+        col_W[i+1]  = 1.0f; //green
+        col_W[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_W);
@@ -1542,8 +1542,8 @@ void init_Y(GLuint shaderProgram) {
 
     for (int i = 0; i < 18 * 3; i += 3) {
         col_Y[i]    = 1.0f; //red
-        col_Y[i+1]  = 0.0f; //green
-        col_Y[i+2]  = 0.0f; //blue
+        col_Y[i+1]  = 1.0f; //green
+        col_Y[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_Y);
@@ -1572,8 +1572,8 @@ void init_Z(GLuint shaderProgram) {
 
     for (int i = 0; i < 18 * 3; i += 3) {
         col_Z[i]    = 1.0f; //red
-        col_Z[i+1]  = 0.0f; //green
-        col_Z[i+2]  = 0.0f; //blue
+        col_Z[i+1]  = 1.0f; //green
+        col_Z[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_Z);
@@ -1602,8 +1602,8 @@ void init_DOT(GLuint shaderProgram) {
 
     for (int i = 0; i < 6 * 3; i += 3) {
         col_DOT[i]    = 1.0f; //red
-        col_DOT[i+1]  = 0.0f; //green
-        col_DOT[i+2]  = 0.0f; //blue
+        col_DOT[i+1]  = 1.0f; //green
+        col_DOT[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_DOT);
@@ -1632,8 +1632,8 @@ void init_0(GLuint shaderProgram) {
 
     for (int i = 0; i < 54 * 3; i += 3) {
         col_0[i]    = 1.0f; //red
-        col_0[i+1]  = 0.0f; //green
-        col_0[i+2]  = 0.0f; //blue
+        col_0[i+1]  = 1.0f; //green
+        col_0[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_0);
@@ -1662,8 +1662,8 @@ void init_1(GLuint shaderProgram) {
 
     for (int i = 0; i < 12 * 3; i += 3) {
         col_1[i]    = 1.0f; //red
-        col_1[i+1]  = 0.0f; //green
-        col_1[i+2]  = 0.0f; //blue
+        col_1[i+1]  = 1.0f; //green
+        col_1[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_1);
@@ -1692,8 +1692,8 @@ void init_2(GLuint shaderProgram) {
 
     for (int i = 0; i < 39 * 3; i += 3) {
         col_2[i]    = 1.0f; //red
-        col_2[i+1]  = 0.0f; //green
-        col_2[i+2]  = 0.0f; //blue
+        col_2[i+1]  = 1.0f; //green
+        col_2[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_2);
@@ -1722,8 +1722,8 @@ void init_3(GLuint shaderProgram) {
 
     for (int i = 0; i < 54 * 3; i += 3) {
         col_3[i]    = 1.0f; //red
-        col_3[i+1]  = 0.0f; //green
-        col_3[i+2]  = 0.0f; //blue
+        col_3[i+1]  = 1.0f; //green
+        col_3[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_3);
@@ -1752,8 +1752,8 @@ void init_4(GLuint shaderProgram) {
 
     for (int i = 0; i < 18 * 3; i += 3) {
         col_4[i]    = 1.0f; //red
-        col_4[i+1]  = 0.0f; //green
-        col_4[i+2]  = 0.0f; //blue
+        col_4[i+1]  = 1.0f; //green
+        col_4[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_4);
@@ -1782,8 +1782,8 @@ void init_5(GLuint shaderProgram) {
 
     for (int i = 0; i < 45 * 3; i += 3) {
         col_5[i]    = 1.0f; //red
-        col_5[i+1]  = 0.0f; //green
-        col_5[i+2]  = 0.0f; //blue
+        col_5[i+1]  = 1.0f; //green
+        col_5[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_5);
@@ -1812,8 +1812,8 @@ void init_6(GLuint shaderProgram) {
 
     for (int i = 0; i < 63 * 3; i += 3) {
         col_6[i]    = 1.0f; //red
-        col_6[i+1]  = 0.0f; //green
-        col_6[i+2]  = 0.0f; //blue
+        col_6[i+1]  = 1.0f; //green
+        col_6[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_6);
@@ -1842,8 +1842,8 @@ void init_7(GLuint shaderProgram) {
 
     for (int i = 0; i < 12 * 3; i += 3) {
         col_7[i]    = 1.0f; //red
-        col_7[i+1]  = 0.0f; //green
-        col_7[i+2]  = 0.0f; //blue
+        col_7[i+1]  = 1.0f; //green
+        col_7[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_7);
@@ -1872,8 +1872,8 @@ void init_8(GLuint shaderProgram) {
 
     for (int i = 0; i < 42 * 3; i += 3) {
         col_8[i]    = 1.0f; //red
-        col_8[i+1]  = 0.0f; //green
-        col_8[i+2]  = 0.0f; //blue
+        col_8[i+1]  = 1.0f; //green
+        col_8[i+2]  = 1.0f; //blue
     }
 
     glGenBuffers(1, &vbo_pos_8);
@@ -1902,8 +1902,8 @@ void init_9(GLuint shaderProgram) {
 
     for (int i = 0; i < 36 * 3; i += 3) {
         col_9[i]    = 1.0f; //red
-        col_9[i+1]  = 0.0f; //green
-        col_9[i+2]  = 0.0f; //blue
+        col_9[i+1]  = 1.0f; //green 0.0 -> 1.0
+        col_9[i+2]  = 1.0f; //blue  0.0 -> 1.0
     }
 
     glGenBuffers(1, &vbo_pos_9);
@@ -2106,7 +2106,17 @@ void drawLetter(char letter, glm::vec3 position, float scale, GLuint shaderProgr
     }
 }
 
-void drawText(const std::string& text, glm::vec3 startPosition, float scale, GLuint shaderProgram, glm::mat4 projectionMatrix, glm::mat4 viewMatrix) {
+void drawText(const std::string& text, glm::vec3 startPosition, float scale, GLuint shaderProgram, glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::vec3 color) {
+    static GLint colorMulLocation = -1;
+    static GLuint lastProgram = 0;
+    if (lastProgram != shaderProgram) {
+        colorMulLocation = glGetUniformLocation(shaderProgram, "colorMul");
+        lastProgram = shaderProgram;
+    }
+    if (colorMulLocation >= 0) {
+        glUniform3f(colorMulLocation, color.x, color.y, color.z);
+    }
+
     float offset = 0.0f;
 
     for (int i = 0; text[i] != '\0'; i++) {

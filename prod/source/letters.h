@@ -9,7 +9,7 @@
 
 void initLetters(GLuint shaderProgram);
 void drawLetter(char letter, glm::vec3 position, float scale, GLuint shaderProgram, glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
-void drawText(const std::string& text, glm::vec3 startPosition, float scale, GLuint shaderProgram, glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
+void drawText(const std::string& text, glm::vec3 startPosition, float scale, GLuint shaderProgram, glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
 void deleteLeters();
 
 #endif
