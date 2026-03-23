@@ -310,6 +310,14 @@ void keyPressed(KeySym key)
 
 int main(int argc, char **argv)
 {
+    int sock;
+    struct sockaddr_in serv_addr;
+
+    pthread_t thread_id;
+
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(5000);
     XEvent event;
     KeySym key;
         
