@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,9 +7,9 @@
 #include <pthread.h>
 #include <time.h>
 #include <poll.h>
-
 #define MAX_PLAYERS 4
 #define COLOR_NUMBER 9
+#define SLEEP_TIME 0
 #define RANDOM_EVENTS 4
 void tasuj_tablice(char *tablica, int rozmiar)
 {
@@ -35,9 +36,11 @@ typedef struct
 } Server;
 void send_all(Server *serv, char *msg, int l)
 {
+    msg[l]='\0';
     for (int j = 1; j <= serv->num_players; j++)
-        if (serv->fds[j].fd != -1)
+        if (serv->fds[j].fd != -1){
             send(serv->fds[j].fd, msg, l, MSG_NOSIGNAL);
+        }
 }
 // inicjalizacja serwera
 void init(Server *ms)
@@ -144,18 +147,34 @@ void lobby(Server *serv)
         }
     }
 }
+// NAPRAWIONY BŁĄD: zmienione <= na <, żeby nie kopiować śmieci z pamięci!
+void charcopy(char *buff,char *tc,int p,int l){
+    for(int i=p; i < p+l; i++){
+        buff[i]=tc[i-p];
+    }
+}
+
 void game(Server *serv)
 {
+    printf("START\n");
     char msg[255];
-
     sprintf(msg, "START\n");
     send_all(serv, msg, strlen(msg)); // każdy gracz dostake wiadomość START
-    char np = serv->num_players; // Zapisujemy liczbę jako 1 bajt
+    char np = serv->num_players+'0';  // Zapisujemy liczbę jako 1 bajt
     send_all(serv, &np, 1);
+    
+    printf("Czekam 3 sekundy przed pierwsza runda...\n");
+    sleep(3); // <--- DODANO: 3 sekundy przerwy przed startem zabawy
+
     for (char lvl = '1'; lvl <= '4'; lvl++)
     { // rundy
         for (int i = 0; i < 5; i++)
         {
+            int z=0;
+            sprintf(msg, "RUNDA\n");
+            sleep(SLEEP_TIME);
+            send_all(serv, msg, strlen(msg));
+            
             // czyszczenie bufforów
             for (int k = 1; k <= serv->num_players; k++)
             {
@@ -168,94 +187,116 @@ void game(Server *serv)
                     }
                 }
             }
-
-            send_all(serv, &lvl, 1);                         // wysyłanie lvl
-            send_all(serv, serv->points, serv->num_players); // wysyłanie punktów
-
-            //[0,1,2,3,4,5,6,7,8]
+            
+            // pakowanie danych (poziom, punkty)
+            charcopy(msg, &lvl, z, 1);
+            z+=1; 
+            charcopy(msg, serv->points, z, serv->num_players);
+            z+=serv->num_players; 
+            
+            // Pierwsze tasowanie (Tekst)
             tasuj_tablice(serv->colors, COLOR_NUMBER);
-            send_all(serv, serv->colors, COLOR_NUMBER); // prześlij numer kolor napisów
-            //[5,3,1,2,4,7,6,8,0]
+            charcopy(msg, serv->colors, z, COLOR_NUMBER);
+            z+=COLOR_NUMBER; 
 
+            // Drugie tasowanie (Kolor tuszu)
             tasuj_tablice(serv->colors, COLOR_NUMBER);
-            send_all(serv, serv->colors, COLOR_NUMBER); // prześlij numer nazwy tekstu kolorów
-            //[8,2,4,7,1,3,5,6,0] musimy potasować tylko te
+            charcopy(msg, serv->colors, z, COLOR_NUMBER);
+            z+=COLOR_NUMBER; 
+            
             char odp;
-            if (lvl == '1')
-                tasuj_tablice(serv->colors, 3); 
-            if (lvl == '2')
-                tasuj_tablice(serv->colors, 5); 
-            if (lvl >= '3')
-                tasuj_tablice(serv->colors, 9);
-            send_all(serv, serv->colors, 1); // prześlij numer koloru napisu
-            odp = serv->colors[0];
+            if (lvl == '1') tasuj_tablice(serv->colors, 3); 
+            if (lvl == '2') tasuj_tablice(serv->colors, 5); 
+            if (lvl >= '3') tasuj_tablice(serv->colors, 9);
+            charcopy(msg, serv->colors, z, 1);
+            z+=1; 
+
+            odp = serv->colors[0]; // To jest nasza poprawna odpowiedź
+            
             tasuj_tablice(serv->colors, COLOR_NUMBER);
-            send_all(serv, serv->colors, 1); // prześlij numer tekstu koloru
+            charcopy(msg, serv->colors, z, 1);
+            z+=1; 
 
-            // TODO wysłanie zdarzeń losowych wysłanie zdarzeń np 4 chary 0-nie ma zdarzenia 1<= zdarzenie o mocy podanej
-            for(int x=0;x<RANDOM_EVENTS;x++){
-                if(rand()%(20/(lvl-'0')))
-                    serv->random_event[x]=0;
-                else
-                    serv->random_event[x]=(lvl-'0');
+            // Zdarzenia losowe
+            for(int x=0; x<RANDOM_EVENTS; x++){
+                if(rand()%(20/(lvl-'0'))) serv->random_event[x]=0;
+                else serv->random_event[x]=(lvl-'0');
             }
-            send_all(serv,serv->random_event,RANDOM_EVENTS);
-            //==========================================================================================================
+            charcopy(msg, serv->random_event, z, RANDOM_EVENTS);
+            z+=RANDOM_EVENTS; 
+            
+            send_all(serv, msg, z);
+            
+            // Upewniamy się, że wszystko wysłane
+            poll(serv->fds, serv->num_players+1, 0);
 
-            // sprawdzanie odpowiedzi
-            // oczekiwanie poll
-            int poll_result = poll(serv->fds, serv->num_players + 1, 10000-(lvl-'1')*1500); // 5 sekund na odpowiedź - 1,5 na każdy następny lvl
+            //===================================================================
+            // NOWY SYSTEM ODCZYTU (Zegar + Odporność na rozłączenie)
+            //===================================================================
+            printf("ODP (lvl %c):\n", lvl);
+            
+            int total_time = 10000 - (lvl-'1')*1500;
+            int time_left = total_time;
+            int round_resolved = 0; // Flaga: 1 jeśli ktoś już zgadł
 
-            // 1. gracz przysłał poprawną odpowiedź +1-4
-            // 2. gracz przysłał błędną odpowiedź -2
-            // 3. żaden gracz nie przysłał odpowiedzi -1 dla wszystkich
-            //sprintf(msg, "WYNIK\n");
-            //send_all(serv, msg, strlen(msg));
-            if (poll_result == 0)
+            // Mierzymy czas z dokładnością do milisekund
+            struct timespec start_time, current_time;
+            clock_gettime(CLOCK_MONOTONIC, &start_time);
+
+            // Pętla kręci się dopóki mamy czas i nikt nie udzielił odpowiedzi
+            while (time_left > 0 && !round_resolved) 
             {
-                // Czas minął, nikt nie odpowiedział
-                for (int x = 0; x < serv->num_players; x++)
+                int poll_result = poll(serv->fds, serv->num_players + 1, time_left);
+                
+                if (poll_result == 0)
                 {
-                    serv->points[x] -= 1;
+                    // Czas minął, nikt nie odpowiedział
+                    for (int x = 0; x < serv->num_players; x++) {
+                        if (serv->fds[x+1].fd != -1) { // Minusy tylko dla tych, co grają
+                            serv->points[x] -= 1;
+                        }
+                    }
+                    break; // Koniec pętli while, przechodzimy do sygnału KRUNDA
                 }
-                //sprintf(msg, "nikt nie odpowiedział, wszyscy -1\n");
-                //send_all(serv, msg, strlen(msg));
-                continue; // Przejdź do następnej rundy
-            }
 
-            for (int j = 1; j <= serv->num_players; j++)
-            {
-                if (serv->fds[j].revents & POLLIN)
+                for (int j = 1; j <= serv->num_players; j++)
                 {
-                    char odp_c[256];
-                    int r = recv(serv->fds[j].fd, odp_c, 255, 0);
-                    if (r > 0)
+                    if (serv->fds[j].fd != -1 && (serv->fds[j].revents & POLLIN))
                     {
-                        if (odp_c[0] == odp)
+                        char odp_c[256];
+                        int r = recv(serv->fds[j].fd, odp_c, 255, 0);
+                        if (r > 0)
                         {
-                            serv->points[j - 1] += (lvl-'0');
-
-                            //sprintf(msg, "Gracz %d odpowiedział dobrze +%d\n", j, lvl - '0');
-                            //send_all(serv, msg, strlen(msg));
+                            if (odp_c[0] == odp) {
+                                serv->points[j - 1] += (lvl-'0');
+                            } else {
+                                serv->points[j - 1] -= 2;
+                            }
+                            round_resolved = 1; // Ktoś odpowiedział!
+                            break; // Przerywamy sprawdzanie innych graczy
                         }
                         else
                         {
-                            serv->points[j - 1] -= 2;
-
-                            //sprintf(msg, "Gracz %d odpowiedział źle -2\n", j);
-                            //send_all(serv, msg, strlen(msg));
+                            printf("Gracz %d sie rozlaczyl.\n", j);
+                            close(serv->fds[j].fd);
+                            serv->fds[j].fd = -1;
+                            // NAPRAWIONE: Gracz się rozłączył, ale nie przerywamy rundy!
                         }
-
-                        break;
-                    }
-                    else
-                    {
-                        printf("Gracz %d sie rozlaczyl.\n", j);
-                        close(serv->fds[j].fd); // Zamknięcie gniazda w systemie
-                        serv->fds[j].fd = -1;
                     }
                 }
+
+                // Odliczamy czas, który upłynął
+                clock_gettime(CLOCK_MONOTONIC, &current_time);
+                long elapsed_ms = (current_time.tv_sec - start_time.tv_sec) * 1000 + 
+                                  (current_time.tv_nsec - start_time.tv_nsec) / 1000000;
+                time_left = total_time - elapsed_ms;
             }
+
+            // --- KONIEC RUNDY ---
+            sprintf(msg, "KRUNDA"); // Równo 6 znaków dla klienta (Koniec Rundy)
+            send_all(serv, msg, 6); // Wysyłamy sygnał końca
+            
+            sleep(1); // <--- DODANO: 1 sekunda przerwy przed kolejną rundą
         }
     }
 }
