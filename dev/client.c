@@ -44,7 +44,7 @@ void *watek_sieciowy(void *socket_desc) {
 
             pthread_mutex_lock(&muteks_gry);
             num_players = np - '0';
-            stan_gry = 2;
+            stan_gry = 3;
             runda_trwa = 0; // Gra się zaczęła, ale czekamy te 3 sekundy na pierwszą rundę
             pthread_mutex_unlock(&muteks_gry);
             
@@ -130,7 +130,7 @@ void *watek_sieciowy(void *socket_desc) {
             }
             
             pthread_mutex_lock(&muteks_gry);
-            stan_gry = 3; 
+            stan_gry = 4; 
             runda_trwa = 0;
             for(int i = 0; i < obecni_gracze; i++) {
                 punkty[i] = finalne_punkty[i];

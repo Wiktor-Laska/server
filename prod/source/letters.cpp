@@ -5,11 +5,6 @@
 #include <string>
 
 
-// TODO:
-//implement numbers, "Y", "J", ".', 
-//implement coloring of text
-
-
 //define A vao, vbo
 GLuint vao_A;
 GLuint vbo_pos_A;
@@ -167,6 +162,27 @@ GLfloat pos_E[] = { //define E pos matrix
 
 GLfloat col_E[24*3]; //define E col matrix
 
+
+//define F vao, vbo
+GLuint vao_F;
+GLuint vbo_pos_F;
+GLuint vbo_col_F;
+
+GLfloat pos_F[] = { //define F pos matrix
+    //kreska
+    -0.25f, -0.5f,  0.0f,     -0.1f,  -0.5f,  0.0f,     -0.1f,   0.5f,  0.0f,
+    -0.25f, -0.5f,  0.0f,     -0.25f,  0.5f,  0.0f,     -0.1f,   0.5f,  0.0f,
+
+    //przod
+     0.25f, -0.5f,  0.0f,     -0.1f,  -0.5f,  0.0f,      0.25f, -0.35f, 0.0f,
+    -0.1f,  -0.5f,  0.0f,      0.25f, -0.35f, 0.0f,     -0.1f,  -0.35f, 0.0f,
+
+    -0.1f,   0.075f,0.0f,     -0.1f,  -0.075f,0.0f,      0.15f,  0.075f,0.0f,
+    -0.1f,  -0.075f,0.0f,      0.15f,  0.075f,0.0f,      0.15f, -0.075f,0.0f
+
+};
+
+GLfloat col_F[18*3]; //define F col matrix
 
 //define G vao, vbo
 GLuint vao_G;
@@ -1107,6 +1123,36 @@ void init_E(GLuint shaderProgram) {
     glBindVertexArray(0);
 }
 
+void init_F(GLuint shaderProgram) {
+    glGenVertexArrays(1, &vao_F);
+    glBindVertexArray(vao_F);
+
+    for (int i = 0; i < 18 * 3; i += 3) {
+        col_F[i]    = 1.0f; //red
+        col_F[i+1]  = 1.0f; //green
+        col_F[i+2]  = 1.0f; //blue
+    }
+
+    glGenBuffers(1, &vbo_pos_F);
+    glGenBuffers(1, &vbo_col_F);
+    GLint posAttrib, colAttrib;
+
+    posAttrib = glGetAttribLocation(shaderProgram, "position"); 
+	colAttrib = glGetAttribLocation(shaderProgram, "color"); 
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos_F); 							
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pos_F), pos_F, GL_STATIC_DRAW); 	
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);				
+	glEnableVertexAttribArray(posAttrib);		
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_col_F);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(col_F), col_F, GL_STATIC_DRAW);
+	glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(colAttrib);
+
+    glBindVertexArray(0);
+}
+
 void init_G(GLuint shaderProgram) {
     glGenVertexArrays(1, &vao_G);
     glBindVertexArray(vao_G);
@@ -1983,6 +2029,7 @@ void initLetters(GLuint shaderProgram) {
     init_C(shaderProgram);
     init_D(shaderProgram);
     init_E(shaderProgram);
+    init_F(shaderProgram);
     init_G(shaderProgram);
     init_H(shaderProgram);
     init_I(shaderProgram);
@@ -2043,6 +2090,10 @@ void drawLetter(char letter, glm::vec3 position, float scale, GLuint shaderProgr
     case 'E':
     glBindVertexArray(vao_E);
     glDrawArrays(GL_TRIANGLES, 0, 24);
+    break;
+    case 'F':
+    glBindVertexArray(vao_F);
+    glDrawArrays(GL_TRIANGLES, 0, 18);
     break;
     case 'G':
     glBindVertexArray(vao_G);

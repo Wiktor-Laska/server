@@ -37,6 +37,94 @@ bool results = false;
 std::string ip = "";
 std::string ip_text = "IP ";
 
+// --- WSPÓŁDZIELONY STAN GRY ---
+int stan_gry = 1;         // 1-Lobby, 2-Gra, 3-Koniec
+int num_players = 0;
+int runda_trwa = 0;
+char runda_lvl = '1';
+char punkty[4] = {0};
+char kolory_tekst[9] = {0}; // Pierwsze 9 bajtów (np. jakie słowo) 49(1)->
+char kolory_tusz[9] = {0};  // Drugie 9 bajtów (np. jakim kolorem pomalowane)
+
+char cel_tekst = 0;         // Pierwszy pojedynczy bajt (cel do znalezienia)
+char cel_tusz = 0;          // Drugi pojedynczy bajt (wskazówka)
+
+char zdarzenia[4] = {0};
+char winner = ' ';
+char win_val = 0;
+
+
+std::string nazwa_text(char c){
+  switch(c)
+{
+  case '1':
+    return "WHITE";
+  break;
+  case '2':
+    return "YELLOW";
+  break;
+  case '3':
+    return "GREEN";
+  break;
+  case '4':
+    return "BLUE";
+  break;
+  case '5':
+    return "PINK";
+  break;
+  case '6':
+    return "BROWN";
+  break;
+  case '7':
+    return "RED";
+  break;
+  case '8':
+    return "ORANGE";
+  break;
+  case '0':
+    return "GRAY";
+  break;
+  default:
+  return "";
+}
+
+}
+
+
+glm::vec3 tusz_text(char c){
+    switch(c)
+{
+  case '1':
+    return glm::vec3(1.0f, 1.0f, 1.0f);
+  break;
+  case '2':
+    return glm::vec3(1.0f, 1.0f, 0.0f);
+  break;
+  case '3':
+    return glm::vec3(0.0f, 1.0f, 0.0f);
+  break;
+  case '4':
+    return glm::vec3(0.0f, 0.0f, 1.0f);
+  break;
+  case '5':
+    return glm::vec3(1.0f, 0.0f, 1.0f);
+  break;
+  case '6':
+    return glm::vec3(0.7f, 0.3f, 0.0f);
+  break;
+  case '7':
+    return glm::vec3(1.0f, 0.0f, 0.0f);
+  break;
+  case '8':
+    return glm::vec3(1.0f, 0.7f, 0.0f);
+  break;
+  case '0':
+    return glm::vec3(0.2f, 0.2f, 0.2f);
+  break;
+  default:
+  return glm::vec3(0.0f, 0.0f, 0.0f);
+}
+}
 
 
 //-------------Atrybuty wierzcholkow------------------------------------------
@@ -253,7 +341,9 @@ int drawGLScene(int counter)
 
     //lobby = true;
 
-    if (results){      // result scene
+    if (stan_gry == 4){      // result scene
+      std::string string_winner_name = "WINNER " + winner; 
+      std::string string_winner_val = "POINTS " + std::to_string(int(win_val));
       glBindVertexArray(vao[1]);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
       translationMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, -0.8f, 0.0f));
@@ -262,11 +352,11 @@ int drawGLScene(int counter)
       glBindVertexArray(vao[1]);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
       drawText("RESULTS", glm::vec3(-1.2f, 1.5f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix);
-      drawText("WINNER: PLACEHOLDER", glm::vec3(-1.5f, 1.0f, 0.0f), 0.3f, shaderProgram, projectionMatrix, viewMatrix);
-      drawText("POINTS: PLACEHOLDER", glm::vec3(-1.5f, 0.5f, 0.0f), 0.3f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(string_winner_name, glm::vec3(-1.5f, 1.0f, 0.0f), 0.3f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(string_winner_val, glm::vec3(-1.5f, 0.5f, 0.0f), 0.3f, shaderProgram, projectionMatrix, viewMatrix);
       drawText("JOIN AGAIN", glm::vec3(-0.8f, -0.45f, 0.0f), 0.3f, shaderProgram, projectionMatrix, viewMatrix);
       drawText("MAIN MENU", glm::vec3(-0.8f, -1.25f, 0.0f), 0.3f, shaderProgram, projectionMatrix, viewMatrix);
-    } else if (game){ // lobby scene
+    } else if (stan_gry == 3){ // lobby scene
       //5
       translationMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, -0.1f, 0.0f));
       scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 1.0f, 1.0f));
@@ -341,36 +431,38 @@ int drawGLScene(int counter)
       glBindVertexArray(vao[1]);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
 
+      if(runda_trwa){
       //1
-      drawText("ORANGE", glm::vec3(-1.5f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[0]), glm::vec3(-1.5f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[0]));
       //2
-      drawText("WHITE", glm::vec3(-0.4f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[1]), glm::vec3(-0.4f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[1]));
       //3
-      drawText("BLACK", glm::vec3(0.7f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[2]), glm::vec3(0.7f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[2]));
       //4
-      drawText("GREEN", glm::vec3(-0.4f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[3]), glm::vec3(-0.4f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[3]));
       //5
-      drawText("YELLOW", glm::vec3(-0.4f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[4]), glm::vec3(-0.4f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[4]));
       //6
-      drawText("BLUE", glm::vec3(-1.5f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[5]), glm::vec3(-1.5f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[5]));
       //7
-      drawText("PINK", glm::vec3(0.7f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[6]), glm::vec3(0.7f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[6]));
       //8
-      drawText("GRAY", glm::vec3(-1.5f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[7]), glm::vec3(-1.5f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[7]));
       //9
-      drawText("RED", glm::vec3(0.7f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix);
+      drawText(nazwa_text(kolory_tekst[8]), glm::vec3(0.7f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[8]));
       //change to received text
-      std::string key_text = "RED";
+      std::string key_text = nazwa_text(cel_tekst);
       float offset = key_text.length()*-0.12f;
       //change to recived colour
-      glm::vec3 key_color = glm::vec3(1.0f, 0.0f, 0.0f);
+      glm::vec3 key_color = tusz_text(cel_tusz);
       //top
       drawText(key_text, glm::vec3(offset+0.12f, 1.45f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix, key_color);
       //bot
       drawText(key_text, glm::vec3(offset+0.12f, -1.35f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix, key_color);
+      }
 
 
-    } else if (lobby) { // game scene
+    } else if (stan_gry == 2) { // game scene
       glBindVertexArray(vao[1]);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
       drawText("WAITING", glm::vec3(-1.2f, 1.5f, 0.0f), 0.4f, shaderProgram, projectionMatrix, viewMatrix);

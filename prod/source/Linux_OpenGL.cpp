@@ -11,9 +11,192 @@
 #include <X11/extensions/xf86vmode.h>
 #include <X11/keysym.h>
 #include "render.h"
+#include <pthread.h>
 
 const int WINDOW_WIDTH = 1080;
 const int WINDOW_HEIGHT = 720;
+
+int decode_button(int c){
+  switch(c)
+{
+  case 1:
+    return 6;
+  break;
+  case 2:
+    return 4;
+  break;
+  case 3:
+    return 7;
+  break;
+  case 4:
+    return 1;
+  break;
+  case 5:
+    return 2;
+  break;
+  case 6:
+    return 3;
+  break;
+  case 7:
+    return 8;
+  break;
+  case 8:
+    return 5;
+  break;
+  case 9:
+    return 9;
+  break;
+  default:
+  return -1;
+}
+
+}
+
+pthread_mutex_t muteks_gry = PTHREAD_MUTEX_INITIALIZER;
+
+void *watek_sieciowy(void *socket_desc) {
+    int sock = *(int*)socket_desc;
+    char naglowek[7];
+
+    while(1) {
+        memset(naglowek, 0, sizeof(naglowek));
+        
+        int r = recv(sock, naglowek, 6, MSG_PEEK); 
+        
+        if (r <= 0) {
+            printf("\n[Sieć] Rozłączono z serwerem.\n");
+            break; 
+        }
+
+        if (strncmp(naglowek, "START\n", 6) == 0) {
+            recv(sock, naglowek, 6, 0); 
+            
+            char np;
+            recv(sock, &np, 1, 0); 
+
+            pthread_mutex_lock(&muteks_gry);
+            num_players = np - '0';
+            stan_gry = 3;
+            runda_trwa = 0; // Gra się zaczęła, ale czekamy te 3 sekundy na pierwszą rundę
+            pthread_mutex_unlock(&muteks_gry);
+            
+            printf("[Sieć] Gra wystartowała! Liczba graczy: %d\n", num_players);
+        } 
+        // start rundy
+        else if (strncmp(naglowek, "RUNDA\n", 6) == 0) {
+            recv(sock, naglowek, 6, 0);
+            
+            char t_lvl, t_punkty[4] = {0};
+            char t_kolory_tekst[9], t_kolory_tusz[9];
+            char t_cel_tekst, t_cel_tusz;
+            char t_zdarzenia[4];
+
+            recv(sock, &t_lvl, 1, 0);
+            
+            int obecni_gracze = 0;
+            pthread_mutex_lock(&muteks_gry);
+            obecni_gracze = num_players;
+            pthread_mutex_unlock(&muteks_gry);
+
+            if (obecni_gracze > 0) {
+                recv(sock, t_punkty, obecni_gracze, 0); 
+            }
+            
+            recv(sock, t_kolory_tekst, 9, 0);
+            recv(sock, t_kolory_tusz, 9, 0);
+            recv(sock, &t_cel_tusz, 1, 0);
+            recv(sock, &t_cel_tekst, 1, 0);
+            recv(sock, t_zdarzenia, 4, 0);
+
+            pthread_mutex_lock(&muteks_gry);
+            runda_lvl = t_lvl;
+            for(int i=0; i < obecni_gracze; i++) punkty[i] = t_punkty[i];
+            
+            for(int i=0; i < 9; i++) {
+                kolory_tekst[i] = t_kolory_tekst[i];
+                kolory_tusz[i] = t_kolory_tusz[i];
+            }
+            
+            cel_tekst = t_cel_tekst;
+            cel_tusz = t_cel_tusz;
+
+            for(int i=0; i < 4; i++) zdarzenia[i] = t_zdarzenia[i];
+            
+            runda_trwa = 1; 
+            pthread_mutex_unlock(&muteks_gry);
+
+            printf("[Sieć] Odebrano nową rundę (Poziom: %c, Cel: %c/%c)\n", t_lvl, t_cel_tekst, t_cel_tusz);
+            for(int i=0; i < obecni_gracze; i++) {
+                printf("  Gracz %d: %d punktów\n", i+1, t_punkty[i]);
+            }   
+        }
+        // ==========================================
+        // ŁAPANIE KOŃCA RUNDY (KRUNDA)
+        // ==========================================
+        else if (strncmp(naglowek, "KRUNDA", 6) == 0) {
+            recv(sock, naglowek, 6, 0); // Wciągamy 6 znaków KRUNDA z gniazda
+            
+            pthread_mutex_lock(&muteks_gry);
+            runda_trwa = 0; // <--- DODANO: Koniec rundy. OpenGL ma wyczyścić planszę na 1 sekundę!
+            pthread_mutex_unlock(&muteks_gry);
+            
+            printf("[Sieć] Koniec rundy! Przygotuj sie...\n");
+        }
+        // ==========================================
+        // zakończenie gierki
+        // ==========================================
+        // zakończenie gierki
+        else if (strncmp(naglowek, "KONIEC", 6) == 0) {
+            recv(sock, naglowek, 6, 0); // Wciągamy "KONIEC"
+            char znak_nowej_linii;
+            recv(sock, &znak_nowej_linii, 1, 0);
+            
+            int obecni_gracze = 0;
+            pthread_mutex_lock(&muteks_gry);
+            obecni_gracze = num_players;
+            pthread_mutex_unlock(&muteks_gry);
+
+            char finalne_punkty[4] = {0};
+            if (obecni_gracze > 0) {
+                recv(sock, finalne_punkty, obecni_gracze, 0);
+            }
+            
+            pthread_mutex_lock(&muteks_gry);
+            stan_gry = 4; 
+            runda_trwa = 0;
+            for(int i = 0; i < obecni_gracze; i++) {
+                punkty[i] = finalne_punkty[i];
+            }
+            pthread_mutex_unlock(&muteks_gry);
+
+            printf("\n=== [Sieć] KONIEC GRY! ===\nWyniki koncowe:\n");
+            int biggest = 0;
+            char c = ' ';
+            for(int i = 0; i < obecni_gracze; i++) {
+                printf("Gracz %d: %d pkt\n", i + 1, finalne_punkty[i]);
+                if(c < finalne_punkty[i]){
+                    c = finalne_punkty[i];
+                    biggest = i;
+                }
+            }
+            winner = biggest;
+            win_val = c;
+        }
+        else {
+            //tutaj przeczytanie zwykłego tekstu, który może być np. wynikiem rundy, informacją o punktach itp.
+            //TODO: CHAT np funkcja WYPISZ_NA_CZACIE
+            char zwykly_tekst[256];
+            memset(zwykly_tekst, 0, sizeof(zwykly_tekst));
+            int przeczytane = recv(sock, zwykly_tekst, 255, 0);
+            
+            if (przeczytane > 0) {
+                printf("%s", zwykly_tekst);
+                fflush(stdout);
+            }
+        }
+    }
+    return NULL;
+}
 
 // struktura parametrow okna
 typedef struct {
@@ -54,24 +237,16 @@ Bool done;
 char tytul[] = "X Window + OpenGL";
 
 void setscene_results(){
-        results = true;
-        game = false;
-        lobby = false;
+        stan_gry = 4;
 }
 void setscene_game(){
-        results = false;
-        game = true;
-        lobby = false;
+        stan_gry = 3;
 }
 void setscene_lobby(){
-        results = false;
-        game = false;
-        lobby = true;
+        stan_gry = 2;
 }
 void setscene_mainmenu(){
-        results = false;
-        game = false;
-        lobby = false;
+        stan_gry = 1;
 }
 
 static void sendSceneChangeToServer(const char *msg)
@@ -357,7 +532,7 @@ int main(int argc, char **argv)
                     int mouseX = event.xbutton.x;
                     int mouseY = event.xbutton.y;
                     printf("X: %d, Y: %d \n", mouseX, mouseY);
-                    if(results == true) {
+                    if(stan_gry == 4) {
 
                         int btn1Width = (int)GLWin.width*(520.0/WINDOW_WIDTH);
                         int btn1Height = (int)GLWin.height*(80.0/WINDOW_HEIGHT);
@@ -381,86 +556,39 @@ int main(int argc, char **argv)
                             //TODO add main menu functionality and server comunication change scene
                         }
 
-                    } else if(game == true){
-                        // --- Rząd 1 ---
-                        int btn1Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn1Height = (int)(GLWin.height * (86.0 / WINDOW_HEIGHT));
-                        int btn1X = (int)(GLWin.width * (120.0 / WINDOW_WIDTH));
-                        int btn1Y = (int)(GLWin.height * (204.0 / WINDOW_HEIGHT));
+                    } else if(stan_gry == 3){
+                        // --- Definicje siatki przycisków 3x3 ---
+                        const float baseX[3] = {120.0, 410.0, 695.0}; // Kolumny
+                        const float baseY[3] = {204.0, 310.0, 410.0}; // Rzędy
+                        const float baseH[3] = {86.0, 85.0, 90.0};    // Wysokości rzędów
+                        const float baseW = 260.0;                    // Wspólna szerokość
 
-                        int btn2Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn2Height = (int)(GLWin.height * (86.0 / WINDOW_HEIGHT));
-                        int btn2X = (int)(GLWin.width * (410.0 / WINDOW_WIDTH));
-                        int btn2Y = (int)(GLWin.height * (204.0 / WINDOW_HEIGHT));
+                        int btnW = (int)(GLWin.width * (baseW / WINDOW_WIDTH));
 
-                        int btn3Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn3Height = (int)(GLWin.height * (86.0 / WINDOW_HEIGHT));
-                        int btn3X = (int)(GLWin.width * (695.0 / WINDOW_WIDTH));
-                        int btn3Y = (int)(GLWin.height * (204.0 / WINDOW_HEIGHT));
+                        // Sprawdzamy wszystkie 9 przycisków w pętli
+                        for (int i = 0; i < 9; i++) {
+                            int row = i / 3; // Wynik to 0, 1 lub 2
+                            int col = i % 3; // Wynik to 0, 1 lub 2
 
-                        // --- Rząd 2 ---
-                        int btn4Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn4Height = (int)(GLWin.height * (85.0 / WINDOW_HEIGHT));
-                        int btn4X = (int)(GLWin.width * (120.0 / WINDOW_WIDTH));
-                        int btn4Y = (int)(GLWin.height * (310.0 / WINDOW_HEIGHT));
+                            int btnX = (int)(GLWin.width * (baseX[col] / WINDOW_WIDTH));
+                            int btnY = (int)(GLWin.height * (baseY[row] / WINDOW_HEIGHT));
+                            int btnH = (int)(GLWin.height * (baseH[row] / WINDOW_HEIGHT));
 
-                        int btn5Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn5Height = (int)(GLWin.height * (85.0 / WINDOW_HEIGHT));
-                        int btn5X = (int)(GLWin.width * (410.0 / WINDOW_WIDTH));
-                        int btn5Y = (int)(GLWin.height * (310.0 / WINDOW_HEIGHT));
-
-                        int btn6Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn6Height = (int)(GLWin.height * (85.0 / WINDOW_HEIGHT));
-                        int btn6X = (int)(GLWin.width * (695.0 / WINDOW_WIDTH));
-                        int btn6Y = (int)(GLWin.height * (310.0 / WINDOW_HEIGHT));
-
-                        // --- Rząd 3 ---
-                        int btn7Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn7Height = (int)(GLWin.height * (90.0 / WINDOW_HEIGHT));
-                        int btn7X = (int)(GLWin.width * (120.0 / WINDOW_WIDTH));
-                        int btn7Y = (int)(GLWin.height * (410.0 / WINDOW_HEIGHT));
-
-                        int btn8Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn8Height = (int)(GLWin.height * (90.0 / WINDOW_HEIGHT));
-                        int btn8X = (int)(GLWin.width * (410.0 / WINDOW_WIDTH));
-                        int btn8Y = (int)(GLWin.height * (410.0 / WINDOW_HEIGHT));
-
-                        int btn9Width = (int)(GLWin.width * (260.0 / WINDOW_WIDTH));
-                        int btn9Height = (int)(GLWin.height * (90.0 / WINDOW_HEIGHT));
-                        int btn9X = (int)(GLWin.width * (695.0 / WINDOW_WIDTH));
-                        int btn9Y = (int)(GLWin.height * (410.0 / WINDOW_HEIGHT));
-
-                        // --- Obsługa kliknięć ---
-                        if (mouseX >= btn1X && mouseX <= btn1X + btn1Width && mouseY >= btn1Y && mouseY <= btn1Y + btn1Height) {
-                            printf("Button 1 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 1
-                        } else if (mouseX >= btn2X && mouseX <= btn2X + btn2Width && mouseY >= btn2Y && mouseY <= btn2Y + btn2Height) {
-                            printf("Button 2 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 2
-                        } else if (mouseX >= btn3X && mouseX <= btn3X + btn3Width && mouseY >= btn3Y && mouseY <= btn3Y + btn3Height) {
-                            printf("Button 3 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 3
-                        } else if (mouseX >= btn4X && mouseX <= btn4X + btn4Width && mouseY >= btn4Y && mouseY <= btn4Y + btn4Height) {
-                            printf("Button 4 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 4
-                        } else if (mouseX >= btn5X && mouseX <= btn5X + btn5Width && mouseY >= btn5Y && mouseY <= btn5Y + btn5Height) {
-                            printf("Button 5 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 5
-                        } else if (mouseX >= btn6X && mouseX <= btn6X + btn6Width && mouseY >= btn6Y && mouseY <= btn6Y + btn6Height) {
-                            printf("Button 6 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 6
-                        } else if (mouseX >= btn7X && mouseX <= btn7X + btn7Width && mouseY >= btn7Y && mouseY <= btn7Y + btn7Height) {
-                            printf("Button 7 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 7
-                        } else if (mouseX >= btn8X && mouseX <= btn8X + btn8Width && mouseY >= btn8Y && mouseY <= btn8Y + btn8Height) {
-                            printf("Button 8 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 8
-                        } else if (mouseX >= btn9X && mouseX <= btn9X + btn9Width && mouseY >= btn9Y && mouseY <= btn9Y + btn9Height) {
-                            printf("Button 9 clicked %d \n", mouseX);
-                            // TODO: Akcja dla przycisku 9
+                            // --- Obsługa kliknięć ---
+                            if (mouseX >= btnX && mouseX <= btnX + btnW && 
+                                mouseY >= btnY && mouseY <= btnY + btnH) {
+                                
+                                printf("Button %d clicked %d \n", decode_button(i + 1), mouseX);
+                                send(sock,&kolory_tekst[decode_button(i+1)-1],1, 0);
+                                //printf("%s \n",nazwa_text(kolory_tusz[decode_button(i+1)-1]).c_str());
+                                
+                                // TODO: Dodaj switch(i) lub wywołaj funkcję na podstawie indeksu przycisku
+                                
+                                break; // Przerywamy pętlę - kliknięto już w przycisk
+                            }
                         }
 
-                    } else if(lobby == true){
+                    } else if(stan_gry == 2){
 
 
                         int btnWidth = (int)GLWin.width*(520.0/WINDOW_WIDTH);
@@ -472,6 +600,7 @@ int main(int argc, char **argv)
                             mouseY >= btnY && mouseY <= btnY + btnHeight) {
                           
                             printf("Ready button clicked %d \n", mouseX);
+                            send(sock,"READY",5, 0);
                             //TODO add ready functionality and server comunication of readiness
                         }
 
@@ -487,8 +616,17 @@ int main(int argc, char **argv)
                             mouseY >= btnY && mouseY <= btnY + btnHeight) {
                           
                             printf("connect button clicked,  add connect function %d \n", mouseX);
+                            stan_gry = 2;
                             setscene_lobby();
-                            //TODO and sceen change and connect function
+                             inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr);
+
+                        if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+                            printf("Błąd połączenia. Czy serwer jest włączony?\n");
+                            return 1;
+                        }
+
+                        // Uruchamiamy wątek w tle, który nasłuchuje serwera
+                        pthread_create(&thread_id, NULL, watek_sieciowy, (void *)&sock);
                         }
 
                     }
