@@ -343,7 +343,7 @@ int drawGLScene(int counter)
 
     if (stan_gry == 4){      // result scene
       std::string string_winner_name = "WINNER " + winner; 
-      std::string string_winner_val = "POINTS " + std::to_string(int(win_val));
+      std::string string_winner_val = "POINTS " + std::to_string(int(win_val));//do naprawy!!!!!!
       glBindVertexArray(vao[1]);
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //rysowanie prostokata
       translationMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, -0.8f, 0.0f));
@@ -438,10 +438,13 @@ int drawGLScene(int counter)
       drawText(nazwa_text(kolory_tekst[1]), glm::vec3(-0.4f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[1]));
       //3
       drawText(nazwa_text(kolory_tekst[2]), glm::vec3(0.7f, 0.05f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[2]));
+      if(int(runda_lvl) > 1){
       //4
       drawText(nazwa_text(kolory_tekst[3]), glm::vec3(-0.4f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[3]));
       //5
       drawText(nazwa_text(kolory_tekst[4]), glm::vec3(-0.4f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[4]));
+      }
+      if(int(runda_lvl) > 2){
       //6
       drawText(nazwa_text(kolory_tekst[5]), glm::vec3(-1.5f, 0.65f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[5]));
       //7
@@ -450,6 +453,7 @@ int drawGLScene(int counter)
       drawText(nazwa_text(kolory_tekst[7]), glm::vec3(-1.5f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[7]));
       //9
       drawText(nazwa_text(kolory_tekst[8]), glm::vec3(0.7f, -0.55f, 0.0f), 0.25f, shaderProgram, projectionMatrix, viewMatrix, tusz_text(kolory_tusz[8]));
+      }
       //change to received text
       std::string key_text = nazwa_text(cel_tekst);
       float offset = key_text.length()*-0.12f;
