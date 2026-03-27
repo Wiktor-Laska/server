@@ -171,7 +171,7 @@ void *watek_sieciowy(void *socket_desc) {
 
             printf("\n=== [Sieć] KONIEC GRY! ===\nWyniki koncowe:\n");
             int biggest = 0;
-            char c = ' ';
+            char c = -127;
             for(int i = 0; i < obecni_gracze; i++) {
                 printf("Gracz %d: %d pkt\n", i + 1, finalne_punkty[i]);
                 if(c < finalne_punkty[i]){
@@ -179,7 +179,7 @@ void *watek_sieciowy(void *socket_desc) {
                     biggest = i;
                 }
             }
-            winner = biggest;
+            winner = biggest+1;
             win_val = c;
         }
         else {
